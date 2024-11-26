@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_USER = "http://192.168.45.64:8080/api/user";
+const BACKEND_URL_USER = "http://192.168.45.26:8080/api/user";
 
 interface UpdateUserNameAndProfileDTO {
   nombre: string;

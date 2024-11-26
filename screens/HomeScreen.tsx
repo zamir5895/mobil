@@ -1,6 +1,5 @@
-// src/screens/HomeScreen.tsx
 import React from 'react';
-import { View, StyleSheet, Button, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
@@ -40,38 +39,38 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff', // Fondo blanco
+    backgroundColor: '#E3F2FD', // Fondo celeste suave
     paddingHorizontal: 20,
   },
   welcomeText: {
-    fontSize: 28,
+    fontSize: 30, // Texto más grande
     fontWeight: 'bold',
-    color: '#6C757D', // Color plomo
+    color: '#1565C0', // Azul más oscuro
     textAlign: 'center',
-    marginBottom: 40,
-    letterSpacing: 1,
+    marginBottom: 50,
+    letterSpacing: 1.2,
   },
   buttonContainer: {
-    width: '80%', // Ancho de los botones
-    marginBottom: 20, // Separación entre botones
+    width: '80%',
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: '#6C757D', // Color plomo de fondo
-    paddingVertical: 12,
-    borderRadius: 8, // Bordes redondeados
+    backgroundColor: '#42A5F5', // Celeste para los botones
+    paddingVertical: 15,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 6, // Sombra para Android
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: '600', // Textos más destacados
-    color: '#ffffff', // Color blanco del texto
-    textTransform: 'uppercase', // Texto en mayúsculas
-    letterSpacing: 1, // Espaciado entre letras
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
 });
