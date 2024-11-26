@@ -25,8 +25,9 @@ export default function AppNavigator() {
                 component={Dashboard} 
                 options={{ headerShown: false }} 
                 />     
+        <Stack.Screen name = "perfil" component={ProfileScreen} />
+
          </Stack.Navigator>
-         <Stack.Screen name="perfil" component={ProfileScreen} />
     </NavigationContainer>
   );
 }

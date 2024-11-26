@@ -1,14 +1,13 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Usa localhost para pruebas locales
-const BACKEND_URL = "http://192.168.45.64:8080/api"; // Asegúrate de que tu servidor está corriendo en esta dirección
+const BACKEND_URL_AUTH = "http://192.168.45.64:8080/api"; 
 
 export const registerUser = async (userName: string, primerNombre: string, SegundoNombre: string, primerApellido: string, segundoApellido: string, edad: number, email:string, password:string, phoneNumber:string, role:string) => {
     try {
         console.log("Registrando usuario...");
         console.log("Datos del usuario:", userName, primerNombre, SegundoNombre, primerApellido, segundoApellido, edad, email, password, phoneNumber, role);
-        const response = await axios.post(`${BACKEND_URL}/auth/register`, {
+        const response = await axios.post(`${BACKEND_URL_AUTH}/auth/register`, {
             userName,
             primerNombre,
             segundoNombre: 
@@ -35,12 +34,11 @@ export const registerPersonalInformation = async (dateOfBirth:Date, gender:strin
     try {
         const userId = await SecureStore.getItemAsync('userId');
     
-    // Asegúrate de que userId existe y convertirlo a int
         if (userId) {
       const userIdInt = parseInt(userId); 
             console.log("Registrando información personal...", userIdInt);
             console.log("datos", dateOfBirth , gender, direccion, pais, ciudad, latitude, longitude, telefono);
-      const response = await axios.post(`${BACKEND_URL}/auth/personalInformation/${userIdInt}`, {
+      const response = await axios.post(`${BACKEND_URL_AUTH}/auth/personalInformation/${userIdInt}`, {
         dateOfBirth,
             gender,
             direccion,
@@ -63,7 +61,9 @@ export const registerPersonalInformation = async (dateOfBirth:Date, gender:strin
 
 export const loginUserInformatio = async (email:string, password:string) => {
     try {
-        const response = await axios.post(`${BACKEND_URL}/auth/login`, {
+        console.log("Iniciando sesión...");
+        console.log("data", email, password);
+        const response = await axios.post(`${BACKEND_URL_AUTH}/auth/login`, {
             email,
             password
         });
@@ -76,4 +76,37 @@ export const loginUserInformatio = async (email:string, password:string) => {
     }
 }
 
+
+export const logout = async () => {
+    try {
+        const response = await axios.post(`${BACKEND_URL_AUTH}/auth/logout`, {}, {
+            headers: {
+                Authorization: `Bearer ${await SecureStore.getItemAsync('token')}`
+            }
+        });
+        console.log("Respuesta del backend:", response.data);
+
+        await SecureStore.deleteItemAsync('userId');
+        await SecureStore.deleteItemAsync('token');
+        await SecureStore.deleteItemAsync('role');
+        console.log("Sesión cerrada");
+
+    } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+    }
+};
+
+export const autentificar = async ( )=>{
+    try {
+        const response = await axios.get(`${BACKEND_URL_AUTH}/auth/authentication`, {
+            headers: {
+                Authorization: `Bearer ${await SecureStore.getItemAsync('token')}`
+            }
+        });
+        console.log("Respuesta del backend:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error al autentificar:", error);
+    }
+}
 
