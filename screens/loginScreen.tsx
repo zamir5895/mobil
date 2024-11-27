@@ -28,7 +28,9 @@ export default function LoginScreen({ navigation }: Props) {
         await SecureStore.setItemAsync('token', response.token);
         await SecureStore.setItemAsync('role', response.role);
         
-
+        console.log("Respuesta del backend:", response);
+        
+    
         navigation.navigate('dashboard');  
       } else {
         Alert.alert('Error', 'Credenciales incorrectas');

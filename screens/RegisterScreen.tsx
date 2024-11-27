@@ -33,24 +33,12 @@ export default function RegisterScreen({ navigation }: Props) {
       return;
     }
   
-    const userData = {
-      userName,
-      primerNombre,
-      segundoNombre,
-      primerApellido,
-      segundoApellido,
-      edad: edadNum,
-      email,
-      password,
-      phoneNumber,
-      role,
-    };
+  
   
     try {
       const response = await registerUser(userName, primerNombre, segundoNombre, primerApellido, segundoApellido, edadNum, email, password, phoneNumber, role);
   
       if ( response.userId) {
-        // Solo guardamos el userId si está presente
         await SecureStore.setItemAsync('userId', response.userId.toString());
         console.log('Respuesta del backend:', response);
         console.log("id del usuario:", response.userId);
@@ -61,15 +49,12 @@ export default function RegisterScreen({ navigation }: Props) {
         Alert.alert('Error', 'Hubo un problema al registrar el usuario');
       }
     } catch (error) {
-      // Aquí imprimimos el error completo para poder verlo en los logs
       console.log('Error al registrar el usuario en el catch:', error);
       if (error instanceof Error && (error as any).response) {
-        // Si el error tiene una respuesta, lo mostramos
         if ((error as any).response) {
           console.log('Detalles del error desde el backend:', (error as any).response.data);
         }
       } else {
-        // Si no hay respuesta, mostramos el error genérico
         if (error instanceof Error) {
           console.log('Error desconocido:', error.message);
         } else {
@@ -140,13 +125,7 @@ export default function RegisterScreen({ navigation }: Props) {
           onChangeText={setPassword}
           secureTextEntry
         />
-         <TextInput
-          style={styles.input}
-          placeholder="Telefono"
-          value={phoneNumber}
-          onChangeText={setPhone}
-          secureTextEntry
-        />
+     
 
         <View style={styles.pickerContainer}>
           <Text style={styles.pickerLabel}>Rol</Text>

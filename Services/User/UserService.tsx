@@ -1,7 +1,6 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_USER = "http://192.168.45.26:8080/api/user";
+const BACKEND_URL_USER = "http://192.168.223.64:8080/api/user";
 
 interface UpdateUserNameAndProfileDTO {
   nombre: string;
@@ -11,12 +10,12 @@ interface UpdateUserDTO {
   nombre: string;
 }
 
-axios.defaults.baseURL = BACKEND_URL_USER;
 
 export const getProfile = async (token: string) => {
   try {
-    const response = await axios.get('/perfilMasInformacion', {
-      headers: { "Authorization": `Bearer ${token}` }
+    console.log("Token en el service:", token);
+    const response = await axios.get(`${BACKEND_URL_USER}/perfilMasInformacion`, {
+      headers: { "Authorization": `${token}` }
     });
     return response.data;
   } catch (error: any) {
@@ -27,7 +26,7 @@ export const getProfile = async (token: string) => {
 
 export const searchUser = async (token: string, query: string) => {
   try {
-    const response = await axios.get(`/${query}`, {
+    const response = await axios.get(`${BACKEND_URL_USER}/${query}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     return response.data;
@@ -47,9 +46,9 @@ export const updateProfile = async (
     formData.append('Data', JSON.stringify(update));
     formData.append('file', foto);
 
-    const response = await axios.put('/update', formData, {
+    const response = await axios.put(`${BACKEND_URL_USER}/update`, formData, {
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": `${token}`,
         "Content-Type": "multipart/form-data"
       }
     });
@@ -62,7 +61,8 @@ export const updateProfile = async (
 
 export const obtenerPequeñaInfo = async (userId: number) => {
   try {
-    const response = await axios.get(`/perfil/${userId}`);
+    
+    const response = await axios.get(`${BACKEND_URL_USER}/perfil/${userId}`);
     return response.data;
   } catch (error: any) {
     console.error("Error al obtener información del usuario:", error);
@@ -72,7 +72,7 @@ export const obtenerPequeñaInfo = async (userId: number) => {
 
 export const getUserById = async (userId: number) => {
   try {
-    const response = await axios.get(`/findById/${userId}`);
+    const response = await axios.get(`${BACKEND_URL_USER}/findById/${userId}`);
     return response.data;
   } catch (error: any) {
     console.error("Error al obtener el usuario por ID:", error);
@@ -97,7 +97,7 @@ export const updatePersonalInformation = async (
   update: UpdateUserDTO
 ) => {
   try {
-    const response = await axios.patch('/profile/informacionPersonal', update, {
+    const response = await axios.patch(`${BACKEND_URL_USER}/profile/informacionPersonal`, update, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     return response.data;
@@ -109,7 +109,7 @@ export const updatePersonalInformation = async (
 
 export const getDireccionInformation = async (userId: number) => {
   try {
-    const response = await axios.get(`/direccion/${userId}`);
+    const response = await axios.get(`${BACKEND_URL_USER}/direccion/${userId}`);
     return response.data;
   } catch (error: any) {
     console.error("Error al obtener la dirección del usuario:", error);

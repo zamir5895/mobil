@@ -1,23 +1,26 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_AUTH = "http://192.168.45.26:8081/api"; 
+const BACKEND_URL_AUTH = "http://192.168.223.64:8080/api"; 
 
-export const registerUser = async (userName: string, primerNombre: string, SegundoNombre: string, primerApellido: string, segundoApellido: string, edad: number, email:string, password:string, phoneNumber:string, role:string) => {
+export const registerUser = async (userName: string, primerNombre: string, segundoNombre: string, primerApellido: string, segundoApellido: string, edad: number, email:string, password:string, phoneNumber:string, role:string) => {
     try {
         console.log("Registrando usuario...");
-        console.log("Datos del usuario:", userName, primerNombre, SegundoNombre, primerApellido, segundoApellido, edad, email, password, phoneNumber, role);
+        console.log("Datos del usuario:", userName, primerNombre, segundoNombre, primerApellido, segundoApellido, edad, email, password, role);
         const response = await axios.post(`${BACKEND_URL_AUTH}/auth/register`, {
             userName,
             primerNombre,
-            segundoNombre: 
+            segundoNombre,
             primerApellido,
             segundoApellido,
             edad,
             email,
             password,
-            phoneNumber,
             role
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
      
 
@@ -38,7 +41,7 @@ export const registerPersonalInformation = async (dateOfBirth:Date, gender:strin
       const userIdInt = parseInt(userId); 
             console.log("Registrando información personal...", userIdInt);
             console.log("datos", dateOfBirth , gender, direccion, pais, ciudad, latitude, longitude, telefono);
-      const response = await axios.post(`${BACKEND_URL_AUTH}/auth/personalInformation/${userIdInt}`, {
+      const response = await axios.patch(`${BACKEND_URL_AUTH}/auth/personalInformation/${userIdInt}`, {
         dateOfBirth,
             gender,
             direccion,
@@ -110,3 +113,32 @@ export const autentificar = async ( )=>{
     }
 }
 
+
+
+export const profile = async (descripcion: string, foto: { uri: string, name: string, type: string }, userId: number) => {
+    try {
+        const formData = new FormData();
+        formData.append("descripcion", descripcion);
+
+        // Verificar que la URI sea accesible
+        const response = await fetch(foto.uri);
+        const fileBlob = await response.blob(); // Convertir la URI en un Blob
+
+        // Agregar el archivo al FormData con el nombre y tipo
+        formData.append("file", fileBlob, foto.name); // El nombre del archivo también es importante
+
+        // Verificar si los datos están siendo enviados correctamente
+        console.log("Enviando datos...");
+        console.log("Descripción:", descripcion);
+        console.log("Archivo:", foto.uri, foto.name, foto.type);
+
+        // No especificar Content-Type, ya que FormData se encarga de ello
+        const responseBackend = await axios.patch(`http://192.168.223.64:8080/api/auth/profile/${userId}`, formData);
+
+        console.log("Respuesta Backend:", responseBackend);
+
+        return responseBackend;
+    } catch (error) {
+        console.error("Error al actualizar el perfil:", error);
+    }
+};
