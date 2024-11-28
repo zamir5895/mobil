@@ -1,6 +1,7 @@
 import { getComentario } from "@/Services/Comment/comment";
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, Image, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
+import { FontAwesome } from '@expo/vector-icons';  // Usando FontAwesome para los iconos
 
 interface Comment {
   message: string;
@@ -17,6 +18,7 @@ interface Comment {
 
 interface CommentsListProps {
   publicacionId: number;
+
 }
 
 const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
@@ -67,10 +69,16 @@ const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
             <Text style={styles.userName}>{comment.nombre}</Text>
             <Text style={styles.message}>{comment.message}</Text>
             <View style={styles.commentFooter}>
-              <Text style={styles.likes}>{comment.likes} likes</Text>
-              <TouchableOpacity onPress={() => handleLike(comment.id)}>
-                <Text style={styles.likeButton}>{likedByUser ? "Unlike" : "Like"}</Text>
-              </TouchableOpacity>
+              <View style={styles.likeContainer}>
+                <TouchableOpacity onPress={() => handleLike(comment.id)} style={styles.likeButton}>
+                  <FontAwesome 
+                    name={likedByUser ? "thumbs-up" : "thumbs-o-up"} 
+                    size={20} 
+                    color={likedByUser ? "#007bff" : "#888"} 
+                  />
+                  <Text style={styles.likeText}>{comment.likes}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -91,13 +99,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    paddingTop: 30,  
+    backgroundColor: "#f0f2f5",  
   },
   commentContainer: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 15,
     backgroundColor: "#fff",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 8,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -114,22 +124,32 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: "bold",
+    fontSize: 16,
+    color: "#333",
   },
   message: {
     marginVertical: 5,
+    color: "#555",
   },
   commentFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
-  likes: {
-    color: "#888",
+  likeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   likeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  likeText: {
+    marginLeft: 5,
     color: "#007bff",
   },
   loadMoreButton: {
-    marginTop: 10,
+    marginTop: 20,
     backgroundColor: "#007bff",
     padding: 10,
     borderRadius: 5,
@@ -138,6 +158,12 @@ const styles = StyleSheet.create({
   loadMoreText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  noCommentsText: {
+    textAlign: "center",
+    color: "#555",
+    fontSize: 18,
+    marginTop: 20,
   },
 });
 

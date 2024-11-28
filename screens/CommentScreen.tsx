@@ -25,8 +25,8 @@ const CommentsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f0f2f5',  
     padding: 20,
-    backgroundColor: '#fff',
   },
 });
 

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { obtenerPequeñaInfo } from '@/Services/User/UserService';
+import { Ionicons } from '@expo/vector-icons';
 
 interface CreateCommentProps {
   publicacionId: number;
@@ -10,54 +11,54 @@ interface CreateCommentProps {
 }
 
 export const CreateComment: React.FC<CreateCommentProps> = ({ publicacionId, setComments }) => {
-    const [storedUserId, setStoredUserId] = useState<string | null>(null);
-  
-    useEffect(() => {
-      const fetchUserId = async () => {
-        const userId = await SecureStore.getItemAsync('userId');
-        setStoredUserId(userId);
-      };
-      fetchUserId();
-    }, []); 
-    const userId = parseInt(storedUserId || ''); 
-    
-    
-    const [comment, setComment] = useState("");
-  
-  
-    const [loading, setLoading] = useState(false);
+  const [storedUserId, setStoredUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const userId = await SecureStore.getItemAsync('userId');
+      setStoredUserId(userId);
+    };
+    fetchUserId();
+  }, []);
+
+  const userId = parseInt(storedUserId || '');
+
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>({});
+
+  useEffect(() => {
+    const fetchObtenerPequeñaInfoUsuario = async () => {
+      try {
+        const response = await obtenerPequeñaInfo(userId);
+        setUser(response);
+      } catch (error) {
+        console.error('Error al obtener la información del usuario:', error);
+      }
+    };
+    fetchObtenerPequeñaInfoUsuario();
+  }, [userId]);
 
   const handleSubmit = async () => {
-    if (comment.trim() === "") return;
+    if (comment.trim() === '') return;
 
     setLoading(true);
     try {
       const comentario = await agregarComentario(publicacionId, {
         message: comment,
-        autorId: userId 
+        autorId: userId,
       });
-      setComments(comentario);
-      setComment("");
+
+      setComments((prevComments: any[]) => [...prevComments, comentario]); // Se asegura de agregar el comentario correctamente
+
+      setComment('');
     } catch (error) {
-      console.error("Error al agregar comentario:", error);
-      Alert.alert("Error", "Ocurrió un error al agregar el comentario.");
+      console.error('Error al agregar comentario:', error);
+      Alert.alert('Error', 'Ocurrió un error al agregar el comentario.');
     } finally {
       setLoading(false);
     }
   };
-  const [user, setUser] = useState<any>({});
-
-  useEffect(()=>{
-    console.log('userId', userId)
-    const fetchObtenerPequeñaInfoUsuario = async () => {
-        try {
-            const response = await obtenerPequeñaInfo(userId);
-            setUser(response);
-        } catch (error) {
-            console.error('Error al obtener la información del usuario:', error);
-        }
-        }
-  })
 
   return (
     <View style={styles.container}>
@@ -88,6 +89,19 @@ export const CreateComment: React.FC<CreateCommentProps> = ({ publicacionId, set
           {loading ? "Enviando..." : "Enviar"}
         </Text>
       </TouchableOpacity>
+
+      {/* Iconos de interacción */}
+      <View style={styles.iconContainer}>
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="camera" size={20} color="#4CAF50" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="happy-outline" size={20} color="#FFD700" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="location" size={20} color="#00BFFF" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -95,39 +109,45 @@ export const CreateComment: React.FC<CreateCommentProps> = ({ publicacionId, set
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 8,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatarContainer: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 8,
   },
   userName: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#666',
     marginBottom: 4,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
   },
   input: {
     flex: 1,
-    padding: 12,
+    padding: 8,
     borderRadius: 25,
     backgroundColor: '#f0f0f0',
     fontSize: 14,
     marginRight: 8,
+    maxHeight: 40,
   },
   submitButton: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
     borderRadius: 25,
   },
   disabledButton: {
@@ -136,5 +156,18 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    marginLeft: 8,
+    alignItems: 'center',
+  },
+  iconButton: {
+    marginRight: 10,
+    padding: 6,
+    borderRadius: 50,
+    backgroundColor: '#f1f1f1',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
