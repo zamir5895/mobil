@@ -4,6 +4,7 @@ import { NavigationProp } from '@react-navigation/native';
 import CrearPublicacion from '../components/Utils/createPublicacion';
 import PostList from '@/components/Utils/Posts';
 import { obtenerPublicacionesInicio } from '@/Services/Publicaciones/Publicaciones';
+import BottomTabs from '@/components/Botones/BottomTabs';
 
 interface Props {
   navigation: NavigationProp<any>;
@@ -73,7 +74,6 @@ export default function Dashboard({ navigation }: Props) {
     }
   };
 
-  // Fetch posts on page change
   useEffect(() => {
     fetchPosts();
   }, [page]);
@@ -117,25 +117,13 @@ export default function Dashboard({ navigation }: Props) {
             onPostCreated={handlePostCreated}
           />
         }
-        onEndReached={handleLoadMore}  // Only load more posts when scrolled to the end
-        onEndReachedThreshold={0.5}    // Trigger load more when scrolled 50% from the bottom
+        onEndReached={handleLoadMore}  
+        onEndReachedThreshold={0.5}    
         ListFooterComponent={loading ? <ActivityIndicator size="small" color="#007bff" /> : null}
       />
 
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.tabText}>Inicio</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('profile')}>
-          <Text style={styles.tabText}>Mi Perfil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Trips')}>
-          <Text style={styles.tabText}>Viajes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Reservations')}>
-          <Text style={styles.tabText}>Reservas</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomTabs navigation={navigation} />
+
     </SafeAreaView>
   );
 }
