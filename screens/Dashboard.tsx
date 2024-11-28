@@ -1,48 +1,103 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView, Image, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import CrearPublicacion from '../components/Utils/createPublicacion'; // Asegúrate de que este archivo esté correctamente importado
+import CrearPublicacion from '../components/Utils/createPublicacion';
+import PostList from '@/components/Utils/Posts';
+import { obtenerPublicacionesInicio } from '@/Services/Publicaciones/Publicaciones';
 
 interface Props {
   navigation: NavigationProp<any>;
 }
 
+interface MultimediaInicioDTO {
+  id: string;
+  contenidoUrl: string;
+  tipo: string;
+  fechaCreacion: string;
+}
+
+interface Post {
+  id: number;
+  contenido: string;
+  cantidadLikes: number;
+  cantidadComentarios: number;
+  fechaPublicacion: string;
+  autorId: number;
+  autorNombre: string;
+  autorFotoUrl: string;
+  multimedia: MultimediaInicioDTO[];
+}
+
 export default function Dashboard({ navigation }: Props) {
-  const [photo, setPhoto] = useState<string | null>(null);
   const [newPostContent, setNewPostContent] = useState('');
   const [showNewPost, setShowNewPost] = useState(true);
-  const [isPublishing, setIsPublishing] = useState(false); 
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const takePhoto = () => {
-    launchCamera({ mediaType: 'photo', cameraType: 'back' }, (response) => {
-      if (response.assets && response.assets.length > 0) {
-        if (response.assets[0].uri) {
-          setPhoto(response.assets[0].uri); 
-        }
-      }
-    });
+  // Fetch function only called when page or loading changes
+  const fetchPosts = async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    try {
+      const response = await obtenerPublicacionesInicio(page, 10);
+      const newPosts = response.content.map((post: any) => ({
+        id: post.id,
+        contenido: post.contenido,
+        autorId: post.autorId,
+        autorNombre: post.autorNombre,
+        autorFotoUrl: post.autorFotoUrl,
+        fechaPublicacion: new Date(post.fechaPublicacion).toLocaleDateString(),
+        cantidadLikes: post.cantidadLikes,
+        cantidadComentarios: post.cantidadComentarios,
+        multimedia: post.multimediaInicioDTO.map((media: any) => ({
+          id: media.id,
+          contenidoUrl: media.contenidoUrl,
+          tipo: media.tipo,
+          fechaCreacion: media.fechaCreacion,
+        })),
+      }));
+
+      setPosts((prevPosts) => [
+        ...prevPosts,
+        ...newPosts,
+      ].sort((a, b) => new Date(b.fechaPublicacion).getTime() - new Date(a.fechaPublicacion).getTime()));
+
+      setHasMore(!response.last);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const pickImage = () => {
-    launchImageLibrary({ mediaType: 'photo' }, (response) => {
-      if (response.assets && response.assets.length > 0) {
-        if (response.assets[0].uri) {
-          setPhoto(response.assets[0].uri);  
-        }
-      }
-    });
-  };
+  // Fetch posts on page change
+  useEffect(() => {
+    fetchPosts();
+  }, [page]);
 
   const handlePostCreated = (newPost: any) => {
-    console.log("Nueva publicación creada:", newPost);
-    setShowNewPost(false); 
+    const completeNewPost = {
+      ...newPost,
+      fechaPublicacion: new Date(newPost.fechaPublicacion).toLocaleDateString(),
+    };
+    setPosts((prevPosts) => [
+      completeNewPost,
+      ...prevPosts,
+    ].sort((a, b) => new Date(b.fechaPublicacion).getTime() - new Date(a.fechaPublicacion).getTime()));
+    setShowNewPost(false);
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      setPage(prevPage => prevPage + 1);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Barra superior */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Living</Text>
         <TouchableOpacity onPress={() => navigation.navigate("perfil")}>
@@ -50,51 +105,34 @@ export default function Dashboard({ navigation }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Contenido principal */}
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Crear publicación */}
-        <CrearPublicacion
-        newPostContent={newPostContent}
-        setNewPostContent={setNewPostContent}
-        showNewPost={showNewPost}
-        onPostCreated={handlePostCreated}  // Asegúrate de pasar la función onPostCreated
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => <PostList posts={[item]} />}
+        ListHeaderComponent={
+          <CrearPublicacion
+            newPostContent={newPostContent}
+            setNewPostContent={setNewPostContent}
+            showNewPost={showNewPost}
+            onPostCreated={handlePostCreated}
+          />
+        }
+        onEndReached={handleLoadMore}  // Only load more posts when scrolled to the end
+        onEndReachedThreshold={0.5}    // Trigger load more when scrolled 50% from the bottom
+        ListFooterComponent={loading ? <ActivityIndicator size="small" color="#007bff" /> : null}
       />
-       
 
-        {/* Publicaciones */}
-        <View style={styles.post}>
-          <View style={styles.postHeader}>
-            <Image source={{ uri: 'https://placeimg.com/40/40/people' }} style={styles.postUserImage} />
-            <Text style={styles.postUserName}>John Doe</Text>
-          </View>
-          <Text style={styles.postText}>¡Tuve un día increíble en la playa!</Text>
-        </View>
-
-        <View style={styles.post}>
-          <View style={styles.postHeader}>
-            <Image source={{ uri: 'https://placeimg.com/40/40/people' }} style={styles.postUserImage} />
-            <Text style={styles.postUserName}>Jane Smith</Text>
-          </View>
-          <Text style={styles.postText}>¡Me encanta el nuevo restaurante que encontré!</Text>
-        </View>
-      </ScrollView>
-
-      {/* Tabs dentro del Dashboard */}
       <View style={styles.tabsContainer}>
         <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Home')}>
-          <Icon name="home-outline" size={30} color="#007bff" />
           <Text style={styles.tabText}>Inicio</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('profile')}>
-          <Icon name="person-outline" size={30} color="#007bff" />
           <Text style={styles.tabText}>Mi Perfil</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Trips')}>
-          <Icon name="airplane-outline" size={30} color="#007bff" />
           <Text style={styles.tabText}>Viajes</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => navigation.navigate('Reservations')}>
-          <Icon name="calendar-outline" size={30} color="#007bff" />
           <Text style={styles.tabText}>Reservas</Text>
         </TouchableOpacity>
       </View>
@@ -127,41 +165,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  content: {
-    padding: 15,
-  },
-  post: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  postHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  postUserImage: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    marginRight: 10,
-  },
-  postUserName: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#333',
-  },
-  postText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
   },
   tabsContainer: {
     flexDirection: 'row',

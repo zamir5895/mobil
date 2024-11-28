@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_PUBLICACIONES = "http://192.168.45.64:8085/api/publicacionInicio";
+const BACKEND_URL_PUBLICACIONES = "http://192.168.1.17:8085/api/publicacionInicio";
 
 interface PostInicioDTO {
   cuerpo: string;
@@ -32,6 +32,15 @@ interface AmigosDTO {
 export const crearPublicacionInicio = async (postInicioDTO: PostInicioDTO) => {
   try {
     console.log("Datos enviados:", postInicioDTO);
+    if(postInicioDTO.autorPId === 0){
+      const userId = await SecureStore.getItemAsync('userId');
+      postInicioDTO.autorPId = parseInt(userId || '');
+    }
+
+    if(postInicioDTO.autorPId === 0){
+      console.error('Error al obtener el usuario');
+      throw new Error('Error al obtener el usuario');
+    }
 
     const response = await axios.post(`${BACKEND_URL_PUBLICACIONES}/`, postInicioDTO, {
       headers: {
@@ -156,7 +165,6 @@ export const obtenerPublicacionesInicio = async (page: number, size: number) => 
     const response = await axios.get(`${BACKEND_URL_PUBLICACIONES}`, {
       params: { page, size },
     });
-    console.log("Publicaciones obtenidas con éxito:", response.data);
     return response.data;
   } catch (error) {
     console.error('Error al obtener las publicaciones de inicio:', error);

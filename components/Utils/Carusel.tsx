@@ -10,82 +10,74 @@ interface MultimediaInicioDTO {
 
 interface CarouselProps {
   multimedia: MultimediaInicioDTO[];
-  style?: object;  // Para estilos adicionales
+  style?: object;
 }
 
 const Carousel: React.FC<CarouselProps> = ({ multimedia, style }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (multimedia.length === 0) {
+    return (
+      <View style={[styles.carouselContainer, style]}>
+        <Text>No hay contenido multimedia disponible</Text>
+      </View>
+    );
+  }
 
   const nextImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % multimedia.length);
   };
 
   const prevImage = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + multimedia.length) % multimedia.length
-    );
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + multimedia.length) % multimedia.length);
   };
 
   return (
     <View style={[styles.carouselContainer, style]}>
       <Image
-        source={{ uri: multimedia[currentIndex]?.contenidoUrl || '' }}
+        source={{ uri: multimedia[currentIndex].contenidoUrl }}
         style={styles.image}
-        resizeMode="contain"
       />
-      {multimedia.length > 1 && (
-        <>
-          <TouchableOpacity onPress={prevImage} style={styles.navButtonLeft}>
-            <Text style={styles.navButtonText}>{'<'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={nextImage} style={styles.navButtonRight}>
-            <Text style={styles.navButtonText}>{'>'}</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <View style={styles.navigation}>
+        <TouchableOpacity onPress={prevImage} style={styles.navButton}>
+          <Text style={styles.navButtonText}>{"<"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={nextImage} style={styles.navButton}>
+          <Text style={styles.navButtonText}>{">"}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   carouselContainer: {
-    position: 'relative',
-    maxWidth: '100%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 200,
+    backgroundColor: '#f0f0f0',
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
-    height: 250, // Puedes ajustar la altura según el diseño
+    height: '100%',
+    resizeMode: 'cover',
   },
-  navButtonLeft: {
+  navigation: {
     position: 'absolute',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     top: '50%',
-    left: 10,
-    transform: [{ translateY: '-50%' }],
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    padding: 10,
   },
-  navButtonRight: {
-    position: 'absolute',
-    top: '50%',
-    right: 10,
-    transform: [{ translateY: '-50%' }],
+  navButton: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
     padding: 10,
   },
   navButtonText: {
     color: 'white',
-    fontSize: 24,
+    fontSize: 18,
   },
 });
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_AUTH = "http://192.168.223.64:8080/api"; 
+const BACKEND_URL_AUTH = "http://192.168.1.17:8080/api"; 
 
 export const registerUser = async (userName: string, primerNombre: string, segundoNombre: string, primerApellido: string, segundoApellido: string, edad: number, email:string, password:string, phoneNumber:string, role:string) => {
     try {
@@ -120,19 +120,15 @@ export const profile = async (descripcion: string, foto: { uri: string, name: st
         const formData = new FormData();
         formData.append("descripcion", descripcion);
 
-        // Verificar que la URI sea accesible
         const response = await fetch(foto.uri);
-        const fileBlob = await response.blob(); // Convertir la URI en un Blob
+        const fileBlob = await response.blob(); 
 
-        // Agregar el archivo al FormData con el nombre y tipo
-        formData.append("file", fileBlob, foto.name); // El nombre del archivo también es importante
+        formData.append("file", fileBlob, foto.name)
 
-        // Verificar si los datos están siendo enviados correctamente
         console.log("Enviando datos...");
         console.log("Descripción:", descripcion);
         console.log("Archivo:", foto.uri, foto.name, foto.type);
 
-        // No especificar Content-Type, ya que FormData se encarga de ello
         const responseBackend = await axios.patch(`http://192.168.223.64:8080/api/auth/profile/${userId}`, formData);
 
         console.log("Respuesta Backend:", responseBackend);

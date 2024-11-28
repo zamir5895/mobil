@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Button, TouchableOpacity, Image, FlatList, StyleSheet, ScrollView } from 'react-native';
-import { ThumbsUp, MessageCircle } from 'lucide-react-native'; // Si usas una librería de iconos compatible con React Native
-import Carousel from './Carusel'; // Debes ajustar el componente CarruselImages a React Native
+import { Modal, View, Text, Button, TouchableOpacity, Image, FlatList, StyleSheet } from 'react-native';
+import { ThumbsUp, MessageCircle } from 'lucide-react-native';
 import { postLike, deleteLike, existsLikeByUserToPost } from '@/Services/Like/Like';
 import * as SecureStore from 'expo-secure-store';
 import CommentsList from './CommentList';
 import { CreateComment } from './createComment';
+import Carousel from './Carusel';
 
 interface MultimediaInicioDTO {
   id: string;
@@ -30,20 +30,6 @@ interface PostListProps {
   posts: Post[];
 }
 
-interface Comment {
-  message: string;
-  likes: number;
-  ulrMultimedia: string;
-  fechaCreacion: string;
-  id: number;
-  multimediaId: string;
-  autorId: number;
-  parentId: number;
-  fotoUrl: string;
-  nombre: string;
-
-}
-
 const PostList: React.FC<PostListProps> = ({ posts }) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [storedUserId, setStoredUserId] = useState<string | null>(null);
@@ -55,6 +41,7 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
     };
     fetchUserId();
   }, []);
+
   const userId = parseInt(storedUserId || '');
   const isAuthenticated = userId > 0;
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
@@ -143,14 +130,12 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
       </TouchableOpacity>
       <View style={styles.cardFooter}>
         <TouchableOpacity onPress={() => handleLikeToggle(item.id)} style={styles.button}>
-          <Text style={[styles.iconText, likedPosts.has(item.id) ? styles.liked : styles.unliked]}>
-            <ThumbsUp />
-          </Text>
-          <Text>{item.cantidadLikes}</Text>
+          <ThumbsUp size={24} color={likedPosts.has(item.id) ? '#1877F2' : '#A9A9A9'} />
+          <Text style={styles.iconText}>{item.cantidadLikes}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button}>
-          <MessageCircle style={styles.icon} />
-          <Text>{item.cantidadComentarios}</Text>
+          <MessageCircle size={24} color="#A9A9A9" />
+          <Text style={styles.iconText}>{item.cantidadComentarios}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -158,22 +143,19 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
 
   return (
     <>
-      <FlatList
-        data={localPosts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id.toString()}
-      />
       {selectedPost && (
         <Modal visible={true} onRequestClose={closeModal}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <ScrollView contentContainerStyle={styles.carouselContainer}>
-                {selectedPost.multimedia.length > 0 ? (
-                  <Carousel multimedia={selectedPost.multimedia} />
-                ) : (
-                  <Text>No hay multimedia disponible</Text>
+              <FlatList
+                data={selectedPost.multimedia}
+                renderItem={({ item }) => (
+                  <Carousel multimedia={[item]} />
                 )}
-              </ScrollView>
+                keyExtractor={(item) => item.id.toString()}
+                ListEmptyComponent={<Text>No hay multimedia disponible</Text>}
+                contentContainerStyle={styles.carouselContainer}
+              />
 
               <View style={styles.postDetails}>
                 <Image
@@ -210,6 +192,11 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
           </View>
         </Modal>
       )}
+      <FlatList
+        data={localPosts}
+        renderItem={renderPost}
+        keyExtractor={(item) => item.id.toString()}
+      />
     </>
   );
 };

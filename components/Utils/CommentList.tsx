@@ -25,7 +25,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [likedByUser, setLikedByUser] = useState(false);
-
+  console.log("publicacionId", publicacionId);
   useEffect(() => {
     fetchComments();
   }, [page]);
