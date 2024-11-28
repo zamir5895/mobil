@@ -1,6 +1,6 @@
 import { getComentario } from "@/Services/Comment/comment";
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, Image, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, Button, Image, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
 
 interface Comment {
   message: string;
@@ -25,7 +25,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [likedByUser, setLikedByUser] = useState(false);
-  console.log("publicacionId", publicacionId);
+
   useEffect(() => {
     fetchComments();
   }, [page]);
@@ -59,7 +59,7 @@ const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={styles.container}>
       {comments.map((comment) => (
         <View key={comment.id} style={styles.commentContainer}>
           <Image source={{ uri: comment.fotoUrl }} style={styles.userImage} />
@@ -83,12 +83,13 @@ const CommentsList: React.FC<CommentsListProps> = ({ publicacionId }) => {
           <Text style={styles.loadMoreText}>{loading ? "Cargando..." : "Cargar más"}</Text>
         </TouchableOpacity>
       )}
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 10,
   },
   commentContainer: {

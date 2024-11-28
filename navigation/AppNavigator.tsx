@@ -10,6 +10,7 @@ import RegisterScreen2 from '@/screens/register2Screen';
 import Dashboard from '@/screens/Dashboard';
 import ProfileScreen from '@/screens/MiProfile';
 import EditProfileScreen from '@/screens/EditProfileScreen';
+import CommentsScreen from '@/screens/CommentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ export default function AppNavigator() {
                   options={{ headerShown: false }} 
                   />     
           <Stack.Screen name = "perfil" component={ProfileScreen} />
+          <Stack.Screen name="CommentsScreen" component={CommentsScreen} />
 
           <Stack.Screen name="uploadPerfil" component={EditProfileScreen} />
 

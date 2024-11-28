@@ -3,6 +3,9 @@ export type RootStackParamList = {
     Home: undefined;
     Login: undefined;
     Register: undefined;
-    // Agrega más rutas según sea necesario
+    masInfo: undefined;
+    dashboard: undefined;
+    perfil: undefined;
+    CommentsScreen: { postId: number };
   };
   

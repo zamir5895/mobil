@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_COMMENT = "http://192.168.1.17:8085/api";
+const BACKEND_URL_COMMENT = "http://192.168.1.17:8085/api/comentarios";
 
 interface ComentarioDto {
   message: string;
@@ -14,7 +14,8 @@ interface CambioContenidoDTO {
 
 export const agregarComentario = async (publicacionId: number, comentarioDTO: ComentarioDto) => {
   try {
-    const response = await axios.post(`${BACKEND_URL_COMMENT}/comentarios/${publicacionId}`, comentarioDTO, {
+    console.log("Datos enviados:", comentarioDTO);
+    const response = await axios.post(`${BACKEND_URL_COMMENT}/${publicacionId}`, comentarioDTO, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,7 +32,7 @@ export const agregarMultimedia = async (comentarioId: number, file: File) => {
   formData.append('file', file);
 
   try {
-    const response = await axios.post(`${BACKEND_URL_COMMENT}/comentarios/${comentarioId}/multimedia`, formData, {
+    const response = await axios.post(`${BACKEND_URL_COMMENT}/${comentarioId}/multimedia`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -51,7 +52,7 @@ export const agregarRespuesta = async (publicacionId: number, parentId: number, 
   }
 
   try {
-    const response = await axios.post(`${BACKEND_URL_COMMENT}/comentarios/${publicacionId}/comentario/${parentId}/respuestas`, formData, {
+    const response = await axios.post(`${BACKEND_URL_COMMENT}/${publicacionId}/comentario/${parentId}/respuestas`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -65,7 +66,8 @@ export const agregarRespuesta = async (publicacionId: number, parentId: number, 
 
 export const getComentario = async (publicacionId: number, page: number, size: number) => {
   try {
-    const response = await axios.get(`${BACKEND_URL_COMMENT}/comentarios/${publicacionId}`, {
+    console.log("Datos enviados:", publicacionId, page, size);
+    const response = await axios.get(`${BACKEND_URL_COMMENT}/${publicacionId}/comentario`, {
       params: { page, size },
     });
     return response.data;
@@ -77,7 +79,7 @@ export const getComentario = async (publicacionId: number, page: number, size: n
 
 export const getRespuestas = async (publicacionId: number, parentId: number, page: number, size: number) => {
   try {
-    const response = await axios.get(`${BACKEND_URL_COMMENT}/comentarios/${publicacionId}/comentario/${parentId}/respuestas`, {
+    const response = await axios.get(`${BACKEND_URL_COMMENT}/${publicacionId}/comentario/${parentId}/respuestas`, {
       params: { page, size },
     });
     return response.data;

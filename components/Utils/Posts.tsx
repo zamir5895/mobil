@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, Button, TouchableOpacity, Image, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet } from 'react-native';
 import { ThumbsUp, MessageCircle } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack'; // Importamos StackNavigationProp
 import { postLike, deleteLike, existsLikeByUserToPost } from '@/Services/Like/Like';
 import * as SecureStore from 'expo-secure-store';
-import CommentsList from './CommentList';
-import { CreateComment } from './createComment';
 import Carousel from './Carusel';
+import { RootStackParamList } from '@/navigation/types';
+
+// Definimos el tipo de navegación
+type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 interface MultimediaInicioDTO {
   id: string;
@@ -31,8 +35,8 @@ interface PostListProps {
 }
 
 const PostList: React.FC<PostListProps> = ({ posts }) => {
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [storedUserId, setStoredUserId] = useState<string | null>(null);
+  const navigation = useNavigation<HomeNavigationProp>(); // Usamos el tipo HomeNavigationProp aquí
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -93,21 +97,13 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
         currentPost,
         ...localPosts.slice(postIndex + 1),
       ]);
-
-      if (selectedPost?.id === postId) {
-        setSelectedPost({ ...currentPost });
-      }
     } catch (error) {
       console.error("Error al dar like:", error);
     }
   };
 
-  const openModal = (post: Post) => {
-    setSelectedPost(post);
-  };
-
-  const closeModal = () => {
-    setSelectedPost(null);
+  const openCommentsScreen = (postId: number) => {
+    navigation.navigate('CommentsScreen', { postId }); // Ahora TypeScript sabe que 'postId' es el parámetro esperado
   };
 
   const renderPost = ({ item }: { item: Post }) => (
@@ -122,7 +118,7 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
           <Text style={styles.postDate}>{item.fechaPublicacion}</Text>
         </View>
       </View>
-      <TouchableOpacity onPress={() => openModal(item)}>
+      <TouchableOpacity onPress={() => openCommentsScreen(item.id)}>
         <Text>{item.contenido}</Text>
         {item.multimedia.length > 0 && (
           <Carousel multimedia={item.multimedia} />
@@ -142,62 +138,11 @@ const PostList: React.FC<PostListProps> = ({ posts }) => {
   );
 
   return (
-    <>
-      {selectedPost && (
-        <Modal visible={true} onRequestClose={closeModal}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <FlatList
-                data={selectedPost.multimedia}
-                renderItem={({ item }) => (
-                  <Carousel multimedia={[item]} />
-                )}
-                keyExtractor={(item) => item.id.toString()}
-                ListEmptyComponent={<Text>No hay multimedia disponible</Text>}
-                contentContainerStyle={styles.carouselContainer}
-              />
-
-              <View style={styles.postDetails}>
-                <Image
-                  source={{ uri: selectedPost.autorFotoUrl || '/default-profile.png' }}
-                  style={styles.avatar}
-                />
-                <Text style={styles.authorName}>{selectedPost.autorNombre}</Text>
-                <Text>{selectedPost.fechaPublicacion}</Text>
-                <Text>{selectedPost.contenido}</Text>
-
-                <View style={styles.actions}>
-                  <TouchableOpacity
-                    onPress={() => handleLikeToggle(selectedPost.id)}
-                    style={styles.button}
-                  >
-                    <Text
-                      style={StyleSheet.flatten([styles.iconText, likedPosts.has(selectedPost.id) ? styles.liked : styles.unliked])}
-                    >
-                      <ThumbsUp />
-                    </Text>
-                    <Text>{selectedPost.cantidadLikes}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.button}>
-                    <MessageCircle style={styles.icon} />
-                    <Text>{selectedPost.cantidadComentarios}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <CommentsList publicacionId={selectedPost.id} />
-                <CreateComment publicacionId={selectedPost.id} setComments={() => {}} />
-              </View>
-            </View>
-            <Button title="Cerrar" onPress={closeModal} />
-          </View>
-        </Modal>
-      )}
-      <FlatList
-        data={localPosts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </>
+    <FlatList
+      data={localPosts}
+      renderItem={renderPost}
+      keyExtractor={(item) => item.id.toString()}
+    />
   );
 };
 
@@ -248,28 +193,6 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: 20,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-  },
-  carouselContainer: {
-    width: '100%',
-    height: 200,
-  },
-  postDetails: {
-    paddingVertical: 20,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
   },
 });
 
