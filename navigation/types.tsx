@@ -7,5 +7,8 @@ export type RootStackParamList = {
     dashboard: undefined;
     perfil: undefined;
     CommentsScreen: { postId: number };
+    PinDetailsScreen: { pinId: string };
+    MapaScreen: undefined;
+
   };
   

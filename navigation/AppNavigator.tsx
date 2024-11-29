@@ -11,6 +11,7 @@ import Dashboard from '@/screens/Dashboard';
 import ProfileScreen from '@/screens/MiProfile';
 import EditProfileScreen from '@/screens/EditProfileScreen';
 import CommentsScreen from '@/screens/CommentScreen';
+import Mapa from '@/screens/MapaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ export default function AppNavigator() {
           <Stack.Screen name="CommentsScreen" component={CommentsScreen} />
 
           <Stack.Screen name="uploadPerfil" component={EditProfileScreen} />
+          <Stack.Screen name="Trips" component={Mapa} />
 
         </Stack.Navigator>
       </NavigationContainer>

@@ -47,6 +47,7 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
   const [isPublishing, setIsPublishing] = useState(false);
   const [user, setUser] = useState<any>({});
   const [storedUserId, setStoredUserId] = useState<string | null>(null);
+  const [postId, setPostId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -61,6 +62,7 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
   useEffect(() => {
     const fetchObtenerPequeñaInfoUsuario = async () => {
       try {
+        console.log("userId:", userId);
         const response = await obtenerPequeñaInfo(userId);
         setUser(response);
       } catch (error) {
@@ -91,6 +93,23 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
     }
   };
 
+  const handleTakePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se necesitan permisos para acceder a la cámara');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setFiles((prevFiles) => [...prevFiles, result.assets[0]]);
+    }
+  };
+
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
@@ -101,13 +120,13 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
     setIsPublishing(true);
   
     try {
-      const postInicioDTO: PostInicioDTO = { cuerpo: newPostContent, autorPId: user?.userId || 0 };
+      const postInicioDTO: PostInicioDTO = { cuerpo: newPostContent, autorPId: userId };
       const post = await crearPublicacionInicio(postInicioDTO);
   
       let multimedia: MultimediaInicioDTO[] = [];
       if (files.length > 0) {
         console.log("Archivos a subir:", files);
-        const response = await subirArchivos(post.id, files); // Enviar archivos
+        const response = await subirArchivos(post.id, files); 
         if (response && response.multimediaInicioDTO) {
           multimedia = response.multimediaInicioDTO.map((file: any) => ({
             id: file.id,
@@ -121,26 +140,30 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
       const newPost = {
         id: post.id,
         contenido: postInicioDTO.cuerpo,
-        autorId: user?.userId || 0,
-        autorNombre: user?.fullName || "Usuario",
-        autorFotoUrl: user?.fotoPerfil || "/default-profile.png",
+        autorId: post.userId,
+        autorNombre: post.autorNombre,
+        autorFotoUrl: post?.autorFotoUrl || "/default-profile.png",
         fechaPublicacion: new Date(post.fechaPublicacion).toLocaleDateString(),
         cantidadComentarios: 0,
         cantidadLikes: 0,
         multimedia,
       };
-  
-      setNewPostContent("");
-      setFiles([]);
-      onPostCreated(newPost);
+
+      setNewPostContent(""); 
+      setFiles([]); 
+      onPostCreated(newPost); // Notificar el post creado
+
+      // Mostrar una notificación o retroalimentación al usuario
+      alert("¡Publicación exitosa!");
+
     } catch (error) {
       console.error("Error durante la publicación:", error);
+      alert("Hubo un error al publicar. Inténtalo de nuevo.");
     } finally {
       setIsPublishing(false);
     }
   };
-  
-  
+
   return (
     <View style={styles.card}>
       <Text style={styles.cardHeader}>Crear Publicación</Text>
@@ -162,11 +185,11 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handleFileSelect} style={styles.button}>
             <Ionicons name="image-outline" style={styles.icon} />
-            <Text>Foto/Video</Text>
+            <Text>Seleccionar Imágenes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Ionicons name="happy-outline" style={styles.icon} />
-            <Text>Sentimiento</Text>
+          <TouchableOpacity onPress={handleTakePhoto} style={styles.button}>
+            <Ionicons name="camera-outline" style={styles.icon} />
+            <Text>Tomar Foto</Text>
           </TouchableOpacity>
         </View>
 
@@ -199,6 +222,7 @@ const CrearPublicacion: React.FC<CrearPublicacionProps> = ({
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   card: {
@@ -259,17 +283,17 @@ const styles = StyleSheet.create({
   fileItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginBottom: 10,
+    padding: 5,
+    marginBottom: 5,
+    borderRadius: 5,
+    backgroundColor: "#f5f5f5",
   },
   removeButton: {
-    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardFooter: {
-    alignItems: "center",
+    marginTop: 10,
   },
 });
 

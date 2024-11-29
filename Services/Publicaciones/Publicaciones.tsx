@@ -55,33 +55,48 @@ export const crearPublicacionInicio = async (postInicioDTO: PostInicioDTO) => {
   }
 };
 
+
 export const subirArchivos = async (postId: number, files: any[]) => {
+  console.log("Archivos enviados:", files);
+  console.log("postId:", postId);
+
   const formData = new FormData();
 
-  // Asegúrate de agregar los archivos bajo el campo 'files'
+  // Para cada archivo seleccionado, construir un objeto adecuado para FormData
   files.forEach((file) => {
+    const fileUri = file.uri;
+    const fileType = file.mimeType || "image/jpeg"; // Se puede usar el tipo MIME de la imagen
+    const fileName = file.fileName || `image-${new Date().getTime()}.jpg`; // Nombre único para cada archivo
+    
+    // Crear un objeto FormData compatible con el archivo (React Native usa 'uri', no 'File')
     const fileBlob = {
-      uri: file.uri,
-      type: file.type,
-      name: file.fileName || 'image.jpg',
-    };
-    formData.append('files', new Blob([JSON.stringify(fileBlob)], { type: 'application/json' }), file.fileName || 'image.jpg');
+      uri: fileUri,
+      type: fileType,
+      name: fileName,
+    } as any;
+    formData.append('files', fileBlob);
   });
 
   try {
     const response = await axios.post(
-      `https://tuservidor.com/api/subir-archivos/${postId}`, // Endpoint correcto
+      `${BACKEND_URL_PUBLICACIONES}/subir-archivos/${postId}`,
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data', // Especificamos que es una solicitud con archivos
+          "Content-Type": "multipart/form-data",
         },
       }
     );
-    return response.data; // Devuelve los datos de respuesta del backend
+    
+    return response.data;
   } catch (error) {
-    console.error("Error al subir los archivos:", error);
-    throw error; // Lanza el error para manejarlo en el frontend
+    if (axios.isAxiosError(error)) {
+      console.error("Error al subir los archivos:", error.message);
+      console.error("Detalles del error:", error.response?.data);
+    } else {
+      console.error("Error desconocido al subir los archivos:", error);
+    }
+    throw error;
   }
 };
 
