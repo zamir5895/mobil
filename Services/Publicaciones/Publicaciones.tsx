@@ -62,13 +62,11 @@ export const subirArchivos = async (postId: number, files: any[]) => {
 
   const formData = new FormData();
 
-  // Para cada archivo seleccionado, construir un objeto adecuado para FormData
   files.forEach((file) => {
     const fileUri = file.uri;
-    const fileType = file.mimeType || "image/jpeg"; // Se puede usar el tipo MIME de la imagen
-    const fileName = file.fileName || `image-${new Date().getTime()}.jpg`; // Nombre único para cada archivo
+    const fileType = file.mimeType || "image/jpeg"; 
+    const fileName = file.fileName || `image-${new Date().getTime()}.jpg`; 
     
-    // Crear un objeto FormData compatible con el archivo (React Native usa 'uri', no 'File')
     const fileBlob = {
       uri: fileUri,
       type: fileType,
