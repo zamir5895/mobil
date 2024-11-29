@@ -37,7 +37,6 @@ export default function Dashboard({ navigation }: Props) {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Fetch function only called when page or loading changes
   const fetchPosts = async () => {
     if (loading || !hasMore) return;
 
