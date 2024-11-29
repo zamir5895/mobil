@@ -115,21 +115,32 @@ export const autentificar = async ( )=>{
 
 
 
-export const profile = async (descripcion: string, foto: { uri: string, name: string, type: string }, userId: number) => {
+export const profile = async (descripcion: string, file:any, userId: number) => {
     try {
         const formData = new FormData();
-        formData.append("descripcion", descripcion);
-
-        const response = await fetch(foto.uri);
-        const fileBlob = await response.blob(); 
-
-        formData.append("file", fileBlob, foto.name)
+        const fileUri = file.uri;
+        const fileType = file.mimeType || "image/jpeg"; 
+        const fileName = file.fileName || `image-${new Date().getTime()}.jpg`; 
+        
+        const fileBlob = {
+          uri: fileUri,
+          type: fileType,
+          name: fileName,
+        } as any;
+        formData.append('file', fileBlob);
+        formData.append('descripcion', descripcion);
 
         console.log("Enviando datos...");
         console.log("Descripción:", descripcion);
-        console.log("Archivo:", foto.uri, foto.name, foto.type);
+        console.log("Archivo:", file.uri, file.name, file.type);
 
-        const responseBackend = await axios.patch(`http://192.168.223.64:8080/api/auth/profile/${userId}`, formData);
+        const responseBackend = await axios.patch(`${BACKEND_URL_AUTH}/auth/profile/${userId}`, formData,
+            {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+        );
 
         console.log("Respuesta Backend:", responseBackend);
 

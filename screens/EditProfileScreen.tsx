@@ -113,7 +113,7 @@ const EditProfileScreen = ({ navigation }: Props) => {
         const response = await profile(descripcion, file, parseInt(userId));
         if (response) {
           Alert.alert('Éxito', 'Perfil actualizado correctamente');
-          navigation.navigate('login');
+          navigation.navigate('Login');
         }
       }
     } catch (error) {

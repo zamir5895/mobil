@@ -6,6 +6,8 @@ import { guardarPin, obtenerPines, Pin, PinCreate } from "@/Services/Pins/Pins";
 import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import * as Location from 'expo-location';
+
 
 interface PinWithUser {
   pin: {
@@ -32,7 +34,16 @@ const Mapa: React.FC = () => {
   const mapRef = useRef<MapView | null>(null);
   const navigation = useNavigation();
   const [user, setUser] = useState<any>({});
-  const [userId, setUserId] = useState<number | null>(null);  
+  const [userId, setUserId] = useState<number | null>(null); 
+  const requestLocationPermission = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Se necesita permiso para acceder a la ubicación');
+    }
+  };
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);    
   useEffect(() => {
     const cargarUsuario = async () => {
       try {
@@ -83,14 +94,22 @@ const Mapa: React.FC = () => {
     cargarUsuario();
   }, []);
 
+  const defaultRegion = {
+    latitude: -12.0464,
+    longitude: -77.0428,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
+  
   useEffect(() => {
     if (pins.length > 0 && mapRef.current) {
       const coordinates = pins.map((p) => ({
         latitude: p.pin.latitude,
         longitude: p.pin.longitude,
-      }));
-  
-      console.log("Coordenadas para ajustar el mapa:", coordinates);
+      })).filter(coord => 
+        coord.latitude >= -90 && coord.latitude <= 90 && 
+        coord.longitude >= -180 && coord.longitude <= 180
+      );
   
       if (coordinates.length > 0) {
         mapRef.current.fitToCoordinates(coordinates, {
@@ -98,10 +117,12 @@ const Mapa: React.FC = () => {
           animated: true,
         });
       } else {
-        console.log("No hay coordenadas válidas para ajustar.");
+        mapRef.current.animateToRegion(defaultRegion, 1000);  // Ajustar la región al valor por defecto
       }
     }
   }, [pins]);
+  
+  
   
 
   const handleSubmit = async () => {
@@ -176,34 +197,33 @@ const Mapa: React.FC = () => {
         onPress={(e) => {
           const { latitude, longitude } = e.nativeEvent.coordinate;
           setNewPlace({ lat: latitude, lng: longitude });
-          setSelectedPin(null); // Resetear pin seleccionado
+          setSelectedPin(null); 
         }}
       >
         {pins.length > 0 ? (
-          pins.map((p) => {
-            if (!p.pin.latitude || !p.pin.longitude) {
-              console.error("Coordenadas inválidas para el pin", p);
-              return null;
-            }
-            console.log("Renderizando marcador para:", p); // Depuración
-            return (
-                <Marker
-                key={p.pin.id}
-                coordinate={{
-                  latitude: p.pin.latitude,
-                  longitude: p.pin.longitude,
-                }
-                
-            }
-                onPress={() => handleMarkerPress(p)}
-              >
-                <Icon name="map-marker" size={30} color="blue" />
-            </Marker>
-            );
-          })
-        ) : (
-          <Text>No hay pines disponibles</Text>
-        )}
+        pins.map((p) => {
+    if (!p.pin.latitude || !p.pin.longitude) {
+      console.error("Coordenadas inválidas para el pin", p);
+      return null;
+    }
+    console.log("Renderizando marcador para:", p); 
+    return (
+      <Marker
+        key={p.pin.id}
+        coordinate={{
+          latitude: p.pin.latitude,
+          longitude: p.pin.longitude,
+        }}
+        onPress={() => handleMarkerPress(p)}
+      >
+        <Icon name="map-marker" size={50} color="red" />
+      </Marker>
+    );
+  })
+) : (
+  <Text>No hay pines disponibles</Text>
+)}
+
       </MapView>
 
       {/* Modal de creación de pin */}
