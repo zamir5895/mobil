@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_COMMENT = "http://192.168.1.17:8085/api/comentarios";
+const BACKEND_URL_COMMENT = "http://192.168.31.64:8085/api/comentarios";
 
 interface ComentarioDto {
   message: string;

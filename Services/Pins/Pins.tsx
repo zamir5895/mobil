@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL_PINS = 'http://192.168.1.17:4000/api/pins/';
+const BACKEND_URL_PINS = 'http://192.168.31.64:4000/api/pins/';
 
 export interface Pin {
     _id: string;

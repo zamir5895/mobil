@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL_AUTH = "http://192.168.1.17:8080/api"; 
+const BACKEND_URL_AUTH = "http://192.168.31.64:8080/api"; 
 
 export const registerUser = async (userName: string, primerNombre: string, segundoNombre: string, primerApellido: string, segundoApellido: string, edad: number, email:string, password:string, phoneNumber:string, role:string) => {
     try {

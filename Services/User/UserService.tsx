@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL_USER = "http://192.168.1.17:8080/api/user";
+const BACKEND_URL_USER = "http://192.168.31.64:8080/api/user";
 
 interface UpdateUserNameAndProfileDTO {
   nombre: string;
